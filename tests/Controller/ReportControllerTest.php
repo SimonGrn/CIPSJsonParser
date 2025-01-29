@@ -15,14 +15,18 @@ class ReportControllerTest extends WebTestCase
 
     public static function setUpBeforeClass(): void
     {
-        $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional');
-        $data = json_decode($data, true);
-        foreach ($data as $datum) {
-            if ($datum['date'] === self::DATE_RESOURCE) {
-                self::$reportId = $datum['id'];
-                break;
+        $numPage = 1;
+        do {
+            $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional&limit=100&page=' . $numPage);
+            $data = json_decode($data, true);
+            foreach ($data['reports'] as $datum) {
+                if ($datum['date'] === self::DATE_RESOURCE) {
+                    self::$reportId = $datum['id'];
+                    break;
+                }
             }
-        }
+            ++$numPage;
+        } while (self::$reportId == 0);
 
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
